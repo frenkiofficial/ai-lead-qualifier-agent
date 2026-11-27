@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Lead Qualifier Agent — Demo | Aqua Ter</title>
+<meta name="description" content="An AI agent that scores incoming leads from chats and DMs — budget, urgency, fit — labels them Hot, Warm or Cold, and drafts the follow-up for you. Interactive demo.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#">Aqua&nbsp;Ter <span>· AI Agent Services</span></a>
+    <nav class="nav">
+      <a href="#demo">Live demo</a>
+      <a href="#how">How scoring works</a>
+      <a href="#deliverables">What you get</a>
+      <a href="#contact" class="nav-cta">Request a quote</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero wrap">
+    <p class="eyebrow">AI Lead Qualifier Agent — interactive demo</p>
+    <h1>Know which leads are worth<br>your time — in seconds.</h1>
+    <p class="lede">Paste a prospect's chat or DM. The agent scores budget, urgency and fit, labels the lead Hot, Warm or Cold, and drafts the follow-up for you — so you reply fast to the right people and stop chasing the wrong ones.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#demo">Try the live demo</a>
+      <a class="btn btn-ghost" href="#how">See how scoring works</a>
+    </div>
+    <p class="sample-note">Sample data — the three example leads below are made-up messages for this demo. Paste your own text to see the agent score a real lead.</p>
+  </section>
+
+  <!-- DEMO -->
+  <section id="demo" class="demo wrap">
+    <h2>Live demo</h2>
+    <p class="section-sub">Paste a lead's message, or load one of the three samples. The agent reads it the way a human would — then shows its working.</p>
+
+    <div class="demo-card">
+      <label for="leadText">The prospect's message</label>
+      <textarea id="leadText" rows="6" placeholder="Paste the chat or DM here — for example: &quot;Hi! I need a website for my bakery. My budget is $500 and I need it live before Christmas. Are you available?&quot;"></textarea>
+      <p class="char-count"><span id="charCount">0</span> characters</p>
+      <p id="inputError" class="input-error" hidden>Paste a message first — the agent needs at least a few words to score.</p>
+
+      <div class="samples">
+        <span class="samples-label">Try a sample lead:</span>
+        <button class="sample-btn sample-hot" data-sample="hot" type="button">Hot — website + store, $700, this week</button>
+        <button class="sample-btn sample-warm" data-sample="warm" type="button">Warm — social media, asks rates, next month</button>
+        <button class="sample-btn sample-cold" data-sample="cold" type="button">Cold — free logo, just looking</button>
+      </div>
+
+      <div class="demo-actions">
+        <button id="analyzeBtn" class="btn btn-primary" type="button">Analyze lead</button>
+        <button id="clearBtn" class="btn btn-ghost" type="button">Clear</button>
+      </div>
+
+      <div id="logPanel" class="log-panel" hidden>
+        <p class="log-title">Agent log</p>
+        <ol id="agentLog" class="agent-log"></ol>
+      </div>
+
+      <div id="results" class="results" hidden>
+        <div class="verdict-row">
+          <div class="verdict-main">
+            <span id="verdictBadge" class="verdict-badge">Hot</span>
+            <p id="verdictLine" class="verdict-line"></p>
+            <p id="verdictAction" class="verdict-action"></p>
+          </div>
+          <div class="score-box">
+            <span id="overallScore" class="score-num">0</span>
+            <span class="score-of">/ 100</span>
+            <span class="score-label">Lead score</span>
+          </div>
+        </div>
+
+        <div class="overall-bar"><span id="overallFill"></span></div>
+
+        <div class="factors">
+          <div class="factor">
+            <div class="factor-head"><span>Budget</span><strong id="budgetScore">0</strong></div>
+            <div class="factor-bar"><span id="budgetFill"></span></div>
+            <div id="budgetSignals" class="signals"></div>
+          </div>
+          <div class="factor">
+            <div class="factor-head"><span>Urgency</span><strong id="urgencyScore">0</strong></div>
+            <div class="factor-bar"><span id="urgencyFill"></span></div>
+            <div id="urgencySignals" class="signals"></div>
+          </div>
+          <div class="factor">
+            <div class="factor-head"><span>Fit</span><strong id="fitScore">0</strong></div>
+            <div class="factor-bar"><span id="fitFill"></span></div>
+            <div id="fitSignals" class="signals"></div>
+          </div>
+        </div>
+
+        <div class="flags-grid">
+          <div>
+            <h3>Red flags</h3>
+            <ul id="flagList" class="flag-list"></ul>
+          </div>
+          <div>
+            <h3>Missing info — ask about this</h3>
+            <ul id="missingList" class="flag-list"></ul>
+          </div>
+        </div>
+
+        <div class="draft-col">
+          <div class="draft-head">
+            <h3>Follow-up draft</h3>
+            <div class="tone-pills" role="tablist" aria-label="Draft tone">
+              <button class="pill active" data-tone="direct" role="tab" aria-selected="true" type="button">Direct</button>
+              <button class="pill" data-tone="friendly" role="tab" aria-selected="false" type="button">Friendly</button>
+            </div>
+          </div>
+          <div class="draft-panel">
+            <p id="draftBody" class="draft-body"></p>
+            <button id="copyDraftBtn" class="btn btn-primary" type="button">Copy draft</button>
+            <span id="copyDraftState" class="copy-state" aria-live="polite"></span>
+          </div>
+          <p class="sample-note">The draft never locks in a final price — it asks the two scope questions first, then quotes. Edit it before you send.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW SCORING WORKS -->
+  <section id="how" class="how wrap">
+    <h2>How scoring works</h2>
+    <p class="section-sub">Three scores, one weighted total. Every point comes from something the lead actually said — the evidence is listed under each score.</p>
+
+    <div class="formula-card">
+      <p class="formula"><strong>Lead score = Budget × 40% + Urgency × 30% + Fit × 30%</strong></p>
+      <p class="formula-thresholds"><strong>70+ Hot</strong> — ready to buy, reply within the hour. &nbsp; <strong>45–69 Warm</strong> — interested, reply today and ask for budget and timeline. &nbsp; <strong>Under 45 Cold</strong> — one polite reply, then move on.</p>
+    </div>
+
+    <div class="factor-explain">
+      <div class="explain-card">
+        <h3>Budget — 40%</h3>
+        <p>A stated amount, the word "budget", or "I'm ready to pay" pushes it up. Asking your rates counts too — it shows buying intent. "Free", "exposure" or "no budget" pulls it down hard.</p>
+      </div>
+      <div class="explain-card">
+        <h3>Urgency — 30%</h3>
+        <p>"Today", "ASAP", "this week" or a launch deadline pushes it up. A named start date (even next month) still counts. "No rush" or "just exploring" pulls it down.</p>
+      </div>
+      <div class="explain-card">
+        <h3>Fit — 30%</h3>
+        <p>Matches against the services actually offered: websites, online stores, social media, WhatsApp automation, SEO, data, transcripts, proposals. Logo, video or photo work is out of scope and pulls it down.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERABLES -->
+  <section id="deliverables" class="deliverables wrap">
+    <h2>What you get</h2>
+    <div class="deliv-grid">
+      <div class="deliv-card">
+        <h3>Scored inbox</h3>
+        <p>Every incoming DM or chat scored the moment it arrives — Hot first, Cold last. No more guessing who to answer first.</p>
+      </div>
+      <div class="deliv-card">
+        <h3>Evidence, not a black box</h3>
+        <p>Each score lists the exact words that caused it, so you can check the agent's reasoning before you trust it.</p>
+      </div>
+      <div class="deliv-card">
+        <h3>Ready-to-send drafts</h3>
+        <p>A follow-up written for that specific lead — right questions, right tone, no fixed price promised before the scope is clear.</p>
+      </div>
+      <div class="deliv-card">
+        <h3>Weekly lead report</h3>
+        <p>How many Hot, Warm and Cold leads came in, who replied, and who went quiet — so you know where the pipeline stands.</p>
+      </div>
+    </div>
+    <p class="pricing-note">Pricing is agreed after scope is clear — no fixed price upfront. You only pay for the setup you approve.</p>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact wrap">
+    <h2>Want this for your business?</h2>
+    <p class="section-sub">Copy the message below and send it to Aqua Ter — tell us where your leads come in (Facebook, WhatsApp, email) and how many you get per week, and you will get a quote for one setup.</p>
+    <div class="dm-box">
+      <p id="dmText">Hi Aqua Ter — I'd like the AI Lead Qualifier Agent for my business. My leads come in through: [Facebook / WhatsApp / email]. I get about [number] leads per week. Please send me a quote for one setup.</p>
+      <button id="copyDmBtn" class="btn btn-primary" type="button">Copy message</button>
+      <span id="copyDmState" class="copy-state" aria-live="polite"></span>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Demo by <strong>Aqua Ter</strong> — AI agent services for small businesses. Sample data for demonstration only; the three example leads are made-up messages, and scores are the demo's own scoring rules, not guarantees.</p>
+    <p><a href="https://github.com/frenkiofficial/ai-lead-qualifier-agent">View the source on GitHub</a></p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
